@@ -1,0 +1,77 @@
+{
+  "configuration": {
+    "monitorInterval": "30",
+    "status": "info",
+    "properties": {
+      "property": [
+        {
+          "name": "loggingLevel",
+          "value": "info"
+        },
+        {
+          "name": "logPattern",
+          "value": "[%d ${hostName} (%level) %logger{1.} {%t}] - %msg %n"
+        },
+        {
+          "name": "filename",
+          "value": "campReservation"
+        },
+        {
+          "name": "logsDir",
+          "value": "logs"
+        },
+        {
+          "name": "maxFileSize",
+          "value": "10MB"
+        },
+        {
+          "name": "maxFiles",
+          "value": "100"
+        }
+      ]
+    },
+    "appenders": {
+      "appender": [
+        {
+          "type": "Console",
+          "name": "Console",
+          "target": "SYSTEM_OUT",
+          "PatternLayout": {
+            "pattern": "${logPattern}"
+          }
+        },
+        {
+          "type": "RollingFile",
+          "name": "RollingFile",
+          "fileName": "${filename}.log",
+          "filePattern": "${logsDir}/${filename}-%d{yyyy-MM-dd-HH-mm-ss}-%i.log.gz",
+          "PatternLayout": {
+            "pattern": "${logPattern}"
+          },
+          "policies": {
+            "SizeBasedTriggeringPolicy": {
+              "size": "${maxFileSize}"
+            }
+          },
+          "DefaultRolloverStrategy": {
+            "max": "${maxFiles}",
+            "fileIndex": "min"
+          }
+        }
+      ]
+    },
+    "loggers": {
+      "Root": {
+        "level": "${loggingLevel}",
+        "AppenderRef": [
+          {
+            "ref": "Console"
+          },
+          {
+            "ref": "RollingFile"
+          }
+        ]
+      }
+    }
+  }
+}

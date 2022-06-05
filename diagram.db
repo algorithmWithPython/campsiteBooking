@@ -1,0 +1,15 @@
+Table booking as B {
+    id long [pk, increment]
+    booking_id uuid [unique]
+    name text [not null]
+    email text [not null]
+}
+
+
+Table booking_date as BD {
+    id long [pk, increment]
+    booking_id long [not null]
+    booked_date date [not null]
+}
+
+Ref: BD.booking_id > B.id

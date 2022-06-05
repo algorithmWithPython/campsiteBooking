@@ -1,0 +1,30 @@
+spring:
+  debug: false
+  logging:
+    config: classpath:log4j2.json
+    level:
+      org.springframework: INFO
+      org.springframework.r2dbc: DEBUG
+      reactor.netty: INFO
+      web: INFO
+#  r2dbc:
+#    url: r2dbc:postgresql://localhost:5432/postgres
+#    username: camp
+#    password: camp123
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/postgres
+#    username: camp
+#    password: camp123
+  flyway:
+    enabled: true
+#    url: jdbc:postgresql://localhost:5432/postgres
+    table: flyway_schema_history
+    baseline-on-migrate: true
+    baseline-version: 1
+    schemas: camp
+    locations: classpath:db/migration
+#    user: camp
+#    password: camp123
+
+
+
