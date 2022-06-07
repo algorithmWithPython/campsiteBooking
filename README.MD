@@ -73,7 +73,9 @@ When run the project on the workstation, use this link to get more details about
   ```
   docker run -d --name postgres -v postgres_data:<local_location> -e POSTGRES_USER=camp -e POSTGRES_PASSWORD=camp123 -p 5432:5432 postgres:latest
   ```
-  Then start the web application by `gradle bootRun`, or start the `BookingApplication` in your IDE. 
+  Then start the web application by `gradle bootRun`, or start the `BookingApplication` in your IDE.
+
+* Under root directory, `./gradlew test` will run all the tests.
 
 * The codes are organized by packages represent various concepts of a REST backend development:
   - dto: various DTO objects used by communication between client and server side
@@ -83,7 +85,8 @@ When run the project on the workstation, use this link to get more details about
   - repos: the DB respsitories to support various db operations
   - exception: Webflux way of exception handling
 
-* There are two tables in the DB: booking and booking_date:
+* There are two tables in the DB, booking and booking_date:
+
   ![tables](tables.png)
 
   The relationship between these tables are one-to-many: for each booking, there will be one record in the booking table, and multiple records in the booking_date table for the booking, each of them represent a single day within the booking. 
