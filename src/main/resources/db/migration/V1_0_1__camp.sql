@@ -17,3 +17,5 @@ create table booking_date(
         references booking(id)
         on delete cascade
 );
+
+create index booking_date_booking_id on booking_date (booking_id)

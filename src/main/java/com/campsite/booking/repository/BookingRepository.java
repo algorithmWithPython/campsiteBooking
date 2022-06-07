@@ -1,4 +1,4 @@
-package com.campsite.booking.repos;
+package com.campsite.booking.repository;
 
 import com.campsite.booking.entity.Booking;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;

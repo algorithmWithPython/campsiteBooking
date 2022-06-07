@@ -44,6 +44,9 @@ class IntegrationTests {
     @LocalServerPort
     private int port;
 
+    @Autowired
+    private WebTestClient testClient;
+
     @ClassRule
     @Container
     public static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:12.11")
@@ -69,21 +72,20 @@ class IntegrationTests {
     }
 
     @Test
-    void operationsTest(@Autowired WebTestClient testClient) {
+    void operationsTest() {
 
         LocalDate currentDate = LocalDate.now();
 
         //initial query, all 5 days are available
-        AvailabilityQueryResponse queryResponse = getAvailabilityQueryResponse(testClient, port, currentDate);
+        AvailabilityQueryResponse queryResponse = getAvailabilityQueryResponse(testClient, currentDate);
         System.out.println(queryResponse);
         assertEquals(5, queryResponse.getAvailableDates().size());
 
         //make a booking for 2 days
         BookingRequest booking = new BookingRequest("name", "e@e", currentDate.plusDays(2), currentDate.plusDays(3));
         BookingResponse bookingResponse = testClient
-            .post().uri(builder -> builder.host("localhost").port(port)
-                .path("/booking/api/v1/book")
-                .build())
+            .post()
+            .uri("/booking/api/v1/book")
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(booking))
             .exchange()
@@ -96,32 +98,30 @@ class IntegrationTests {
         UUID bookingId = bookingResponse.getBookingId();
 
         //query availability, now 5-2=3 days are available
-        AvailabilityQueryResponse queryResponse2 = getAvailabilityQueryResponse(testClient, port, currentDate);
+        AvailabilityQueryResponse queryResponse2 = getAvailabilityQueryResponse(testClient, currentDate);
         System.out.println(queryResponse2);
         assertEquals(3, queryResponse2.getAvailableDates().size());
 
         //make another booking for 3 days, which overlaps with the previous booking(fail)
         BookingRequest booking2 = new BookingRequest("name", "e@e", currentDate.plusDays(3), currentDate.plusDays(5));
         testClient
-            .post().uri(builder -> builder.host("localhost").port(port)
-                .path("/booking/api/v1/book")
-                .build())
+            .post()
+            .uri("/booking/api/v1/book")
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(booking2))
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 
         //query availability, 3 days are still available
-        AvailabilityQueryResponse queryResponse3 = getAvailabilityQueryResponse(testClient, port, currentDate);
+        AvailabilityQueryResponse queryResponse3 = getAvailabilityQueryResponse(testClient, currentDate);
         System.out.println(queryResponse3);
         assertEquals(3, queryResponse3.getAvailableDates().size());
 
         //update the booking from 3 days to 3 days
         UpdateRequest updateRequest = new UpdateRequest("name2", "f@f", currentDate.plusDays(1), null);
         BookingResponse updateResponse = testClient
-            .patch().uri(builder -> builder.host("localhost").port(port)
-                .path("/booking/api/v1/update/{id}")
-                .build(bookingId.toString()))
+            .patch()
+            .uri("/booking/api/v1/update/{id}", bookingId.toString())
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(updateRequest))
             .exchange()
@@ -133,15 +133,14 @@ class IntegrationTests {
         assertEquals(bookingId, updateResponse.getBookingId());
 
         //query availability, now 5=3=2 days are available
-        AvailabilityQueryResponse queryResponse4 = getAvailabilityQueryResponse(testClient, port, currentDate);
+        AvailabilityQueryResponse queryResponse4 = getAvailabilityQueryResponse(testClient, currentDate);
         System.out.println(queryResponse4);
         assertEquals(2, queryResponse4.getAvailableDates().size());
 
         //delete the booking
         DeletionResponse deletionResponse = testClient
-            .delete().uri(builder -> builder.host("localhost").port(port)
-                .path("/booking/api/v1/cancel/{id}")
-                .build(bookingId.toString()))
+            .delete()
+            .uri("/booking/api/v1/cancel/{id}", bookingId.toString())
             .exchange()
             .expectStatus().isOk()
             .expectBody(DeletionResponse.class)
@@ -151,7 +150,7 @@ class IntegrationTests {
         assertEquals(bookingId, deletionResponse.getBookingId());
 
         //query availability, 5 days are available.
-        AvailabilityQueryResponse queryResponse5 = getAvailabilityQueryResponse(testClient, port, currentDate);
+        AvailabilityQueryResponse queryResponse5 = getAvailabilityQueryResponse(testClient, currentDate);
         System.out.println(queryResponse5);
         assertEquals(5, queryResponse5.getAvailableDates().size());
     }
@@ -215,12 +214,10 @@ class IntegrationTests {
             });
     }
 
-    private AvailabilityQueryResponse getAvailabilityQueryResponse(WebTestClient testClient, int port, LocalDate currentDate) {
+    private AvailabilityQueryResponse getAvailabilityQueryResponse(WebTestClient testClient, LocalDate currentDate) {
         return testClient.
             get()
             .uri(builder -> builder
-                .host("localhost")
-                .port(port)
                 .path("/booking/api/v1/availability")
                 .queryParam("start", currentDate.plusDays(1))
                 .queryParam("end", currentDate.plusDays(5))
