@@ -68,6 +68,9 @@ When run the project on the workstation, use this link to get more details about
 * Use Spring Boot, Spring reactive stack: webflux and Spring R2DBC with postgres. 
   The reactive stack can support more concurrent requests. 
   Although R2DBC does not support relationship well, the application code takes care of it.
+  
+* Application high-level design diagram
+  ![diagram](site.png)
 
 * As a development environment setup, start postgres docker container as following:
   ```
